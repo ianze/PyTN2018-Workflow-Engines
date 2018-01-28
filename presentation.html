@@ -89,8 +89,8 @@
         <section>
             <h1>Intro</h1>
             <aside class="notes">
-The idea for this tutorial came as Austin and I were looking at different solutions to ETL jobs that
-our team.<br>
+The idea for this tutorial came as Austin and I were looking at different solutions to ETL jobs/workflow engines that
+to be utilized by our team.<br>
 The intention is for developers that might be considering using these tools to get some more hands on experience<br>
 with them. More than just reading a tutorial but experiment with writing DAGs for them, see things fail<br>
 and fix them and have a feeling where these tools excel and where they come short.<br>
@@ -143,8 +143,13 @@ The worker actually execute the python code that was defined.
             <h2>Airflow Demo</h2>
         </Section>
         <aside class="notes">
-We will show the Airflow UI through which we will also show the components, functionality and the docker<br>
-implementation you will use.
+The main UI is on port 8080<br>
+Show details about a DAG that ran, code<br>
+Run a DAG and show logs etc.<br>
+Show the logs of a task that run.<br>
+Show Flower UI - <br>
+We will use a celery worker and flower is the UI to monitor and administer the cluster.<br>
+Show components of our Docker setup and how we will work (DAGs directory, /tmp/work directory).
         </aside>
         <section>
             <h2>Lesson 1</h2>
@@ -167,6 +172,14 @@ implementation you will use.
                 dag = DAG('tutorial', default_args=default_args)
             </code></pre>
         </section>
+        <aside class="notes">
+DAG - Directed Acyclic Graph. Each node on the Airflow DAG is a task with some logic to execute.<br>
+The only job Airflow has is know when to execute DAGs identify dependencies and execute tasks accordingly<br>
+These are called default_args b/c this is eventually passed to the tasks by the DAG. In order to avoid duplication<br>
+we specify it in DAG level. You must pass <b>owner</b> and <b>start_date</b>.<br>
+There are many more parameters you can pass: email, pool, priority, and_date. And some others we will see later.<br>
+That's it now you have see how you can define a DAG!<br>
+        </aside>
         <section>
             <h4>Airflow Tasks - Bash Operator</h4>
             <pre><code data-trim data-noescape>
@@ -184,6 +197,12 @@ implementation you will use.
                 t2.set_upstream(t1)
             </code></pre>
         </section>
+        <aside class="notes">
+We have a DAG defined but it doesn't do much, right?<br>
+This is where operators come in. Here we instantiate a two bash operators and pass a bash command to execute.<br>
+Once an operator was instantiated it is now a task on the DAG. <br>
+We also define a dependency between our tasks by setting the first to be upstream from the second<br>
+        </aside>
         <section>
             <h4>Airflow Tasks - Python Operator</h4>
             <pre><code data-trim data-noescape>
@@ -200,6 +219,11 @@ implementation you will use.
                     dag=dag)
             </code></pre>
         </section>
+        <aside class="notes">
+Airflow comes with a bunch of built in Operator. This is an example of the Python operator where you just pass in <br>
+A python function.
+Other operators: Hive, Http (calls an endpoint), MySQL (runs a query), SlackPost.
+        </aside>
         <section>
             <h2>Lesson 2</h2>
             <p>
