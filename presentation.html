@@ -253,13 +253,18 @@ Other operators: Hive, Http (calls an endpoint), MySQL (runs a query), SlackPost
                     dag=dag)
             </code></pre>
         </section>
+        <aside class="notes">
+When you have a long running job especially communicating with a DB or another external service things will fail.<br>
+Sometimes they fail and will not recover but sometimes just a retry will help.<br>
+You can see here that Airflow has built in support for this. You can define retries globally or you can define them per Task<br>
+This makes your job much more stable and robust.
+        </aside>
         <section>
             <h2>Jinja2</h2>
             <pre><code data-trim data-noescape>
                 templated_command = """
                 {% for i in range(5) %}
                 echo "{{ ds }}"
-                echo "{{ macros.ds_add(ds, 7) }}"
                 echo "{{ params.my_param }}"
                 {% endfor %}
                 """
@@ -272,6 +277,12 @@ Other operators: Hive, Http (calls an endpoint), MySQL (runs a query), SlackPost
                     dag=dag)
             </code></pre>
         </section>
+        <aside class="notes">
+Another great feature of Airflow is it has templating using Jinja2. It supports several pre-defined variables such
+ds which you can see here. this is today time stamp. Other variables give information regarding the DAG, Task and other run information.<br>
+As you can see in parameters you can pass your own parameters.<br>
+Many of the Operators support passing a template argument that Airflow will render for you. This comes in handy for such commands with bash or SQL<br>
+        </aside>
         <section>
             <h2>Parallel Execution</h2>
             <pre><code data-trim data-noescape>
@@ -282,6 +293,11 @@ Other operators: Hive, Http (calls an endpoint), MySQL (runs a query), SlackPost
                         dag=dag)
             </code></pre>
         </section>
+<aside class="notes">
+This is where I find a lot of the power of defining your workflow using Python lies. You are not limited to a static config file<br>
+The tasks can be very dynamic as you can see here in a loop.<br>
+The information about DAG name is usually passed to the task instance and you can have access to it.
+</aside>
         <section>
             <h2>Lesson 3</h2>
             <p>
@@ -297,15 +313,24 @@ Other operators: Hive, Http (calls an endpoint), MySQL (runs a query), SlackPost
                 Add retries to make sure your DAG succeeds.
             </p>
         </section>
+        <aside class="notes">
+Please do these in order. Construct first a DAG that performs part one. See the results.<br>
+Then update the dag for a random error. You can use the utility file opener that works the same as regular python open,<br>
+Refresh your DAG, run and see how some tasks are being retried.<br>
+        </aside>
         <section>
             <h2>More Airflow features</h2>
             <ul>
                 <li>Pools</li>
                 <li>SLA</li>
+                <li>Plugins</li>
                 <li>Historic Visualization</li>
                 <li>Xcom</li>
             </ul>
         </section>
+<aside class="notes">
+These are some features that make Airflow stand out (I think) to other workflow engines.<br>
+</aside>
         <section>
             <h2>Testing</h2>
             <ul>
@@ -313,6 +338,13 @@ Other operators: Hive, Http (calls an endpoint), MySQL (runs a query), SlackPost
                 <li>Dev/QA Environment</li>
             </ul>
         </section>
+<aside class="notes">
+Testing your workflow since it is in the end just a graph (no logic) is difficult.<br>
+You can try writing some tests but it is very difficult to simulate conditions.<br>
+Usually what developers choose to extract as much of the logic as they can and unit test it. While also have a QA server<br>
+Running continuously.<br>
+I think Airflow still has some limitations in this regard but it does present some interesting options.
+</aside>
         <section>
             <h2>CLI</h2>
             <pre><code data-trim data-noescape>
@@ -325,6 +357,11 @@ Other operators: Hive, Http (calls an endpoint), MySQL (runs a query), SlackPost
                 airflow test first_dag test_task 2001-01-01
             </code></pre>
         </section>
+<aside class="notes">
+First, after writing a DAG you can just see there are no syntax errors by running that module.<br>
+After that if you setup up correctly you can also run it using the CLI either locally or on the server<br>
+By using the CLI and the `test` command this run will not be logged to the DB and just run locally<br>
+</aside>
         <section>
             <h2>Unit Tests</h2>
             <ul>
@@ -332,6 +369,11 @@ Other operators: Hive, Http (calls an endpoint), MySQL (runs a query), SlackPost
                 <li>Operators</li>
             </ul>
         </section>
+<aside class="notes">
+When designing unit tests there are two approaches. Move as much of the logic as possible to a function and unit test the function<br>
+But once your logic is more complex you actually have state you might want to create your own operator.<br>
+The operator API is quite simple and you can implement it and construct unit tests around it<br>
+</aside>
         <section>
             <h3>Unit Test - Operators</h3>
             <pre><code data-trim data-noescape>
@@ -342,10 +384,10 @@ Other operators: Hive, Http (calls an endpoint), MySQL (runs a query), SlackPost
             <pre><code data-trim data-noescape>
                 class PyTNOperator(BaseOperator):
                     @apply_defaults
-                    def __init__(self, my_operator_param,
+                    def __init__(self, operator_param,
                             *args, **kwargs):
-                        self.operator_param = my_operator_param
-                        super(MyFirstOperator, self).__init__(
+                        self.operator_param = operator_param
+                        super(PyTNOperator, self).__init__(
                             *args, **kwargs)
                     def execute(self, context):
                         print("PyTN2018")
@@ -359,25 +401,39 @@ Other operators: Hive, Http (calls an endpoint), MySQL (runs a query), SlackPost
             </code></pre>
 
             <pre><code data-trim data-noescape>
-                class TestMyOperator(TestCase):
+                class TestPyTNOperator(TestCase):
                     def test_execute(self):
                         dag = DAG(dag_id='pytn_dag', start_date=datetime.now())
-                        task = MyOperator(dag=dag, task_id='first_task')
+                        task = PyTNOperator(dag=dag, task_id='first_task')
                         ti = TaskInstance(task=task, execution_date=datetime.now())
                         result = task.execute(ti.get_template_context())
-                        self.assertEqual(result, 'PyTN2018')
+                        self.assertEqual(result, "PyTN2018")
             </code></pre>
         </section>
+<aside class="notes">
+You need to do some setup by creating a mock DAG and a task.<br>
+But it does open the option that when your logic or your use case becomes complex where you need to create your own DAGs<br>
+You have the ability to create good unit tests around them.
+</aside>
         <section>
             <h2>Dev/QA Server</h2>
         </section>
+<aside class="notes">
+Running a separate environment server gives you the confidence that you did end to end test however that requires<br>
+extracting some config values out of the DAG to be injected/read from external source.<br>
+It adds more complexity into your DAG to support it especially if you have a large amount of DAGs<br>
+Here too having the DAG defined using Python where you can read environment variables help a lot.<br>
+</aside>
         <section>
             <h2>Lesson 4</h2>
             <p>
                 Use the Airflow CLI to test a task.<br><br>
 
-                Write unit tests for methods or operators in your DAG.
-                (TODO: How to sh into the worker)<br><br>
+                Write unit tests for methods or operators in your DAG.<br><br>
+
+                SSH into worker:<br> <b>bash -c "clear && docker exec -it pytn2018airflowprogress_worker_1 sh"</b><br>
+                Run tests in the directory:<br> <b>/usr/local/airflow/dags</b>
+                <br><br>
 
                 Update your DAG so you can run it both in production and on QA server.
             </p>
