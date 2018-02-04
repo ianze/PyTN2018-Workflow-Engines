@@ -341,6 +341,10 @@ You can try writing some tests but it is very difficult to simulate conditions.<
 Usually what developers choose to extract as much of the logic as they can and unit test it. While also have a QA server<br>
 Running continuously.<br>
 I think Airflow still has some limitations in this regard but it does present some interesting options.
+Running a separate environment server gives you the confidence that you did end to end test however that requires<br>
+extracting some config values out of the DAG to be injected/read from external source.<br>
+It adds more complexity into your DAG to support it especially if you have a large amount of DAGs<br>
+Here too having the DAG defined using Python where you can read environment variables help a lot.<br>
 </aside>
         </section>
         <section>
@@ -382,9 +386,9 @@ The operator API is quite simple and you can implement it and construct unit tes
             <pre><code data-trim data-noescape>
                 class PyTNOperator(BaseOperator):
                     @apply_defaults
-                    def __init__(self, operator_param,
+                    def __init__(self, params,
                             *args, **kwargs):
-                        self.operator_param = operator_param
+                        self.params = params
                         super(PyTNOperator, self).__init__(
                             *args, **kwargs)
                     def execute(self, context):
@@ -404,6 +408,7 @@ The operator API is quite simple and you can implement it and construct unit tes
                         dag = DAG(dag_id='pytn_dag', start_date=datetime.now())
                         task = PyTNOperator(dag=dag, task_id='first_task')
                         ti = TaskInstance(task=task, execution_date=datetime.now())
+
                         result = task.execute(ti.get_template_context())
                         self.assertEqual(result, "PyTN2018")
             </code></pre>
@@ -414,22 +419,11 @@ You have the ability to create good unit tests around them.
 </aside>
         </section>
         <section>
-            <h2>Dev/QA Server</h2>
-<aside class="notes">
-Running a separate environment server gives you the confidence that you did end to end test however that requires<br>
-extracting some config values out of the DAG to be injected/read from external source.<br>
-It adds more complexity into your DAG to support it especially if you have a large amount of DAGs<br>
-Here too having the DAG defined using Python where you can read environment variables help a lot.<br>
-</aside>
-        </section>
-        <section>
             <h2>Lesson 4</h2>
             <p>
-                Use the Airflow CLI to test a task.<br><br>
-
                 Write unit tests for methods or operators in your DAG.<br><br>
 
-                SSH into worker:<br> <b>docker exec -it pytn2018airflowprogress_worker_1 sh</b><br>
+                SSH into worker:<br> <b>docker exec -it pytn2018airflow_worker_1 sh</b><br>
                 <br>
                 Run tests in the directory:<br> <b>/usr/local/airflow/dags</b>
                 <br><br>
