@@ -61,7 +61,7 @@
             <h2>Setup Instructions</h2>
             <p>
                 <ul>
-                    <li>Airflow - TODO</li>
+                    <li>Airflow - https://github.com/ianze/PyTN2018-Airflow</li>
                     <li>Luigi - TBD</li>
                 </ul>
             </p>
@@ -169,7 +169,6 @@ Show components of our Docker setup and how we will work (DAGs directory, /tmp/w
                 }
                 dag = DAG('tutorial', default_args=default_args)
             </code></pre>
-        </section>
         <aside class="notes">
 DAG - Directed Acyclic Graph. Each node on the Airflow DAG is a task with some logic to execute.<br>
 The only job Airflow has is know when to execute DAGs identify dependencies and execute tasks accordingly<br>
@@ -178,6 +177,7 @@ we specify it in DAG level. You must pass <b>owner</b> and <b>start_date</b>.<br
 There are many more parameters you can pass: email, pool, priority, and_date. And some others we will see later.<br>
 That's it now you have see how you can define a DAG!<br>
         </aside>
+        </section>
         <section>
             <h4>Airflow Tasks - Bash Operator</h4>
             <pre><code data-trim data-noescape>
@@ -194,13 +194,13 @@ That's it now you have see how you can define a DAG!<br>
 
                 t2.set_upstream(t1)
             </code></pre>
-        </section>
         <aside class="notes">
 We have a DAG defined but it doesn't do much, right?<br>
 This is where operators come in. Here we instantiate a two bash operators and pass a bash command to execute.<br>
 Once an operator was instantiated it is now a task on the DAG. <br>
 We also define a dependency between our tasks by setting the first to be upstream from the second<br>
         </aside>
+        </section>
         <section>
             <h4>Airflow Tasks - Python Operator</h4>
             <pre><code data-trim data-noescape>
@@ -216,12 +216,12 @@ We also define a dependency between our tasks by setting the first to be upstrea
                     python_callable=print_context,
                     dag=dag)
             </code></pre>
-        </section>
         <aside class="notes">
 Airflow comes with a bunch of built in Operator. This is an example of the Python operator where you just pass in <br>
 A python function.
 Other operators: Hive, Http (calls an endpoint), MySQL (runs a query), SlackPost.
         </aside>
+        </section>
         <section>
             <h2>Lesson 2</h2>
             <p>
@@ -250,13 +250,13 @@ Other operators: Hive, Http (calls an endpoint), MySQL (runs a query), SlackPost
                     retries=3,
                     dag=dag)
             </code></pre>
-        </section>
         <aside class="notes">
 When you have a long running job especially communicating with a DB or another external service things will fail.<br>
 Sometimes they fail and will not recover but sometimes just a retry will help.<br>
 You can see here that Airflow has built in support for this. You can define retries globally or you can define them per Task<br>
 This makes your job much more stable and robust.
         </aside>
+        </section>
         <section>
             <h2>Jinja2</h2>
             <pre><code data-trim data-noescape>
@@ -274,13 +274,13 @@ This makes your job much more stable and robust.
                     params={'my_param': 'Parameter I passed in'},
                     dag=dag)
             </code></pre>
-        </section>
         <aside class="notes">
 Another great feature of Airflow is it has templating using Jinja2. It supports several pre-defined variables such
 ds which you can see here. this is today time stamp. Other variables give information regarding the DAG, Task and other run information.<br>
 As you can see in parameters you can pass your own parameters.<br>
 Many of the Operators support passing a template argument that Airflow will render for you. This comes in handy for such commands with bash or SQL<br>
         </aside>
+        </section>
         <section>
             <h2>Parallel Execution</h2>
             <pre><code data-trim data-noescape>
@@ -290,12 +290,12 @@ Many of the Operators support passing a template argument that Airflow will rend
                         bash_command=script.sh,
                         dag=dag)
             </code></pre>
-        </section>
 <aside class="notes">
 This is where I find a lot of the power of defining your workflow using Python lies. You are not limited to a static config file<br>
 The tasks can be very dynamic as you can see here in a loop.<br>
 The information about DAG name is usually passed to the task instance and you can have access to it.
 </aside>
+        </section>
         <section>
             <h2>Lesson 3</h2>
             <p>
@@ -310,12 +310,12 @@ The information about DAG name is usually passed to the task instance and you ca
                 Use  <b>pytn_utils.RandomFailOpen</b> instead the built in open<br>
                 Add retries to make sure your DAG succeeds.
             </p>
-        </section>
         <aside class="notes">
 Please do these in order. Construct first a DAG that performs part one. See the results.<br>
 Then update the dag for a random error. You can use the utility file opener that works the same as regular python open,<br>
 Refresh your DAG, run and see how some tasks are being retried.<br>
         </aside>
+        </section>
         <section>
             <h2>More Airflow features</h2>
             <ul>
@@ -325,17 +325,16 @@ Refresh your DAG, run and see how some tasks are being retried.<br>
                 <li>Historic Visualization</li>
                 <li>Xcom</li>
             </ul>
-        </section>
 <aside class="notes">
 These are some features that make Airflow stand out (I think) to other workflow engines.<br>
 </aside>
+        </section>
         <section>
             <h2>Testing</h2>
             <ul>
                 <li>Unit Tests</li>
                 <li>Dev/QA Environment</li>
             </ul>
-        </section>
 <aside class="notes">
 Testing your workflow since it is in the end just a graph (no logic) is difficult.<br>
 You can try writing some tests but it is very difficult to simulate conditions.<br>
@@ -343,6 +342,7 @@ Usually what developers choose to extract as much of the logic as they can and u
 Running continuously.<br>
 I think Airflow still has some limitations in this regard but it does present some interesting options.
 </aside>
+        </section>
         <section>
             <h2>CLI</h2>
             <pre><code data-trim data-noescape>
@@ -354,24 +354,24 @@ I think Airflow still has some limitations in this regard but it does present so
                 # testing print_date
                 airflow test first_dag test_task 2001-01-01
             </code></pre>
-        </section>
 <aside class="notes">
 First, after writing a DAG you can just see there are no syntax errors by running that module.<br>
 After that if you setup up correctly you can also run it using the CLI either locally or on the server<br>
 By using the CLI and the `test` command this run will not be logged to the DB and just run locally<br>
 </aside>
+        </section>
         <section>
             <h2>Unit Tests</h2>
             <ul>
                 <li>Internal Logic</li>
                 <li>Operators</li>
             </ul>
-        </section>
 <aside class="notes">
 When designing unit tests there are two approaches. Move as much of the logic as possible to a function and unit test the function<br>
 But once your logic is more complex you actually have state you might want to create your own operator.<br>
 The operator API is quite simple and you can implement it and construct unit tests around it<br>
 </aside>
+        </section>
         <section>
             <h3>Unit Test - Operators</h3>
             <pre><code data-trim data-noescape>
@@ -407,21 +407,21 @@ The operator API is quite simple and you can implement it and construct unit tes
                         result = task.execute(ti.get_template_context())
                         self.assertEqual(result, "PyTN2018")
             </code></pre>
-        </section>
 <aside class="notes">
 You need to do some setup by creating a mock DAG and a task.<br>
 But it does open the option that when your logic or your use case becomes complex where you need to create your own DAGs<br>
 You have the ability to create good unit tests around them.
 </aside>
+        </section>
         <section>
             <h2>Dev/QA Server</h2>
-        </section>
 <aside class="notes">
 Running a separate environment server gives you the confidence that you did end to end test however that requires<br>
 extracting some config values out of the DAG to be injected/read from external source.<br>
 It adds more complexity into your DAG to support it especially if you have a large amount of DAGs<br>
 Here too having the DAG defined using Python where you can read environment variables help a lot.<br>
 </aside>
+        </section>
         <section>
             <h2>Lesson 4</h2>
             <p>
