@@ -397,7 +397,7 @@ The operator API is quite simple and you can implement it and construct unit tes
             <h3>Unit Test - Operators</h3>
             <pre><code data-trim data-noescape>
                 from airflow.models import DAG, TaskInstance
-                from test_dag import MyOperator
+                from test_dag import PyTNOperator
             </code></pre>
 
             <pre><code data-trim data-noescape>
@@ -432,6 +432,7 @@ Here too having the DAG defined using Python where you can read environment vari
                 Write unit tests for methods or operators in your DAG.<br><br>
 
                 SSH into worker:<br> <b>bash -c "clear && docker exec -it pytn2018airflowprogress_worker_1 sh"</b><br>
+                <br>
                 Run tests in the directory:<br> <b>/usr/local/airflow/dags</b>
                 <br><br>
 
