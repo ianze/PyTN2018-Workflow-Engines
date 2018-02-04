@@ -128,14 +128,12 @@ This is not a data streaming solution (Spark streaming, storm), similar solution
                 <li>UI</li>
                 <li>MetaData Database(Postgres)</li>
                 <li>Scheduler</li>
-                <li>Executor</li>
                 <li>Workers</li>
             </ul>
             <aside class="notes">
 Airflow UI is a Flask application that is used to display, monitor and control our DAG execution.<br>
 Metadata database is used to store information about the current state of DAGs and tasks to facilitate UI presentation and scheduler operation<br>
 The scheduler is a python process that runs and is used to schedule DAG and tasks runs.<br>
-The executor is a component tightly coupled to the scheduler and triggers units of work on the workers. You can have local vs. celery executes.<br>
 The worker actually execute the python code that was defined.
             </aside>
         </Section>
