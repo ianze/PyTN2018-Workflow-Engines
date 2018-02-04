@@ -81,9 +81,11 @@
             <div id="right">
                 <b>Austin Hacker</b>
                 <ul>
-                    <li></li>
-                    <li></li>
+                    <li>Python programmer for 4+ years</li>
+                    <li>Workflow Automation</li>
                 </ul>
+                </br>
+                explosivepyrounicorns@gmail.com
             </div>
         </section>
         <section>
@@ -104,6 +106,41 @@ We hope you had opportunity to download the repos and install the requirements. 
 Have some additional time to do this.<br>
 The tutorial is split into two sections. In each section we will present the engine we are working with.<br>
 We will then have a series of lessons where in each lesson we will cover some theory and then you can practice<br>
+            </aside>
+        </section>
+        <section>
+            <h2>Luigi</h2>
+            <ul>
+                <li>Designed by Spotify</li>
+                <li>Automate long-running processes</li>
+                <li>Support for the Hadoop ecosystem</li>
+            </ul>
+            <aside class="notes">
+Luigi started as an internal tool developed by Spotify to manage the plumbing associated with long-running hadoop jobs and other batch processing.<br>
+Open sourced in 2012.<br>
+Like other workflow engines at the time, Luigi provides built-in support for Hadoop jobs but is designed to be more general use<br>
+            </aside>
+        </section>
+        <section>
+            <h2>Nitty Gritty</h2>
+            <ul>
+                <li>File-based</li>
+                <li>Visualiser Page</li>
+                <li>Scheduler and Workers</li>
+                <li>Object-Oriented Structure</li>
+            </ul>
+            <aside class="notes">
+Luigi uses files to trigger tasks and output data processing<br>
+While a task is running, a simple web UI is available to check on task progress<br>
+It is possible to run luigi pipelines with the local scheduler but the central scheduler is preffered.<br>
+Central scheduler is a single-threaded process that spawns workers when needed.<br>
+Tasks are specified using classes.<br>
+            </aside>
+        </section>
+        <section>
+            <img class="stretch" style="height: 609px; width: 512.77px;" src="img/scheduling.gif">
+            <aside>
+
             </aside>
         </section>
         <section>
