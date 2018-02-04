@@ -61,7 +61,7 @@
             <h2>Setup Instructions</h2>
             <p>
                 <ul>
-                    <li>Airflow - https://github.com/ianze/PyTN2018-Airflow</li>
+                    <li>https://github.com/ianze/PyTN2018-Airflow</li><br>
                     <li>Luigi - TBD</li>
                 </ul>
             </p>
@@ -388,7 +388,7 @@ The operator API is quite simple and you can implement it and construct unit tes
                         super(PyTNOperator, self).__init__(
                             *args, **kwargs)
                     def execute(self, context):
-                        print("PyTN2018")
+                        return "PyTN2018"
             </code></pre>
         </section>
         <section>
@@ -429,12 +429,10 @@ Here too having the DAG defined using Python where you can read environment vari
 
                 Write unit tests for methods or operators in your DAG.<br><br>
 
-                SSH into worker:<br> <b>bash -c "clear && docker exec -it pytn2018airflowprogress_worker_1 sh"</b><br>
+                SSH into worker:<br> <b>docker exec -it pytn2018airflowprogress_worker_1 sh</b><br>
                 <br>
                 Run tests in the directory:<br> <b>/usr/local/airflow/dags</b>
                 <br><br>
-
-                Update your DAG so you can run it both in production and on QA server.
             </p>
         </section>
         <section>
