@@ -92,7 +92,9 @@
         </section>
         <section>
             <h1>Intro</h1>
+            <img class="stretch" style="height: 609px; width: 512.77px;" src="img/example.png">
             <aside class="notes">
+<b>Simplified and Generalized</b>
 The idea for this tutorial came as Austin and I were looking at different solutions to ETL jobs/workflow engines that
 to be utilized by our team.<br>
 The intention is for developers that might be considering using these tools to get some more hands on experience<br>
@@ -166,7 +168,7 @@ This is not a data streaming solution (Spark streaming, storm), similar solution
             <ul>
                 <li>UI</li>
                 <li>MetaData Database(Postgres)</li>
-                <li>Scheduler</li>
+                <li>Scheduler(Executor)</li>
                 <li>Workers</li>
             </ul>
             <aside class="notes">
@@ -181,11 +183,10 @@ The worker actually execute the python code that was defined.
         </Section>
         <aside class="notes">
 The main UI is on port 8080<br>
+Stats about the DAG run, Code, Graph.<br>
 Show details about a DAG that ran, code<br>
 Run a DAG and show logs etc.<br>
 Show the logs of a task that run.<br>
-Show Flower UI - <br>
-We will use a celery worker and flower is the UI to monitor and administer the cluster.<br>
 Show components of our Docker setup and how we will work (DAGs directory, /tmp/work directory).
         </aside>
         <section>
@@ -227,7 +228,7 @@ That's it now you have see how you can define a DAG!<br>
                     dag=dag)
             </code></pre>
             <pre><code data-trim data-noescape>
-                 t2 = BashOperator(
+                t2 = BashOperator(
                     task_id='sleep',
                     bash_command='sleep 5',
                     dag=dag)
@@ -279,15 +280,15 @@ Other operators: Hive, Http (calls an endpoint), MySQL (runs a query), SlackPost
             <pre><code data-trim data-noescape>
                 dag_args = {
                     'email_on_retry': False,
-                    'retries': 3,
-                    'retry_delay': timedelta(seconds=30),
+                    'retries': 2,
+                    'retry_delay': timedelta(seconds=10),
                 }
             </code></pre>
             <pre><code data-trim data-noescape>
                 BashOperator(
                     task_id='sleep',
                     bash_command='sleep 5',
-                    retries=3,
+                    retries=5,
                     dag=dag)
             </code></pre>
         <aside class="notes">
@@ -302,8 +303,8 @@ This makes your job much more stable and robust.
             <pre><code data-trim data-noescape>
                 templated_command = """
                 {% for i in range(5) %}
-                echo "{{ ds }}"
-                echo "{{ params.my_param }}"
+                    echo "{{ ds }}"
+                    echo "{{ params.my_param }}"
                 {% endfor %}
                 """
             </code></pre>
@@ -329,6 +330,11 @@ Many of the Operators support passing a template argument that Airflow will rend
                         task_id='task-num-' + i,
                         bash_command=script.sh,
                         dag=dag)
+            </code></pre>
+
+            <pre><code data-trim data-noescape>
+                def print_task_id(ds, **kwargs):
+                    print("task id {}".format(kwargs['ti'].task_id)
             </code></pre>
 <aside class="notes">
 This is where I find a lot of the power of defining your workflow using Python lies. You are not limited to a static config file<br>
@@ -362,7 +368,7 @@ Refresh your DAG, run and see how some tasks are being retried.<br>
                 <li>Pools</li>
                 <li>SLA</li>
                 <li>Plugins</li>
-                <li>Historic Visualization</li>
+                <li>Hooks</li>
                 <li>Xcom</li>
             </ul>
 <aside class="notes">
@@ -390,9 +396,6 @@ Here too having the DAG defined using Python where you can read environment vari
         <section>
             <h2>CLI</h2>
             <pre><code data-trim data-noescape>
-                python dags/first_dag.py
-            </code></pre>
-            <pre><code data-trim data-noescape>
                 # command layout: command subcommand dag_id task_id date
 
                 # testing print_date
@@ -402,18 +405,6 @@ Here too having the DAG defined using Python where you can read environment vari
 First, after writing a DAG you can just see there are no syntax errors by running that module.<br>
 After that if you setup up correctly you can also run it using the CLI either locally or on the server<br>
 By using the CLI and the `test` command this run will not be logged to the DB and just run locally<br>
-</aside>
-        </section>
-        <section>
-            <h2>Unit Tests</h2>
-            <ul>
-                <li>Internal Logic</li>
-                <li>Operators</li>
-            </ul>
-<aside class="notes">
-When designing unit tests there are two approaches. Move as much of the logic as possible to a function and unit test the function<br>
-But once your logic is more complex you actually have state you might want to create your own operator.<br>
-The operator API is quite simple and you can implement it and construct unit tests around it<br>
 </aside>
         </section>
         <section>
