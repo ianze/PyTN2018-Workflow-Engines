@@ -142,10 +142,142 @@ Tasks are specified using classes.<br>
             </aside>
         </section>
         <section>
-            <img class="stretch" style="height: 609px; width: 512.77px;" src="img/scheduling.gif">
-            <aside>
+            <h2>Task Structure</h2>
+            <pre><code data-trim data-noescape>
+                class TaskClass(luigi.Task):
+                    def requires(self):
+                        #I specify dependencies for this task
+                        return AnotherTaskClass()
+                    def output(self):
+                        #I specify an output file for task data
+                        return luigi.LocalTarget("target_file")
+                    def run(self):
+                        #I run code!
+                        pass
+            </code></pre>
+        </section>
+        <section>
+            <h2>Running a Task</h2>
+            <pre><code data-trim data-noescape>
+                class TaskClass(luigi.Task):
+                    ...
+                    def run(self):
+                        processed_data = ""
+                        with self.input().open('r') as foo:
+                            processed_data = foo.read()
+                        with self.output().open('w') as bar:
+                            bar.write(processed_data)
+            </code></pre>
+        </section>
+        <section>
+            <h2>External Tasks</h2>
+            <pre><code data-trim data-noescape>
+                class ExternalTaskClass(luigi.ExternalTask):
+                    def output(self):
+                        return luigi.LocalTarget("external_file.txt")
+            </code></pre>
+        </section>
+        <section>
+            <h2>Putting it Together</h2>
+            <pre><code data-trim data-noescape>
+                class ExternalTaskClass(luigi.ExternalTask):
+                    def output(self):
+                        return luigi.LocalTarget("external_file.txt")
 
-            </aside>
+                class TaskClass(luigi.Task):
+                    def requires(self):
+                        return ExternalTaskClass()
+                    ...
+            </code></pre>
+        </section>
+        <section>
+            <h2>Lesson 1</h2>
+            <p>
+                <b>https://github.com/a-hacker/PyTN2018-Luigi</b>
+                <br><br>
+                Write your own dag to perform XKCD substitions on the input file.<br><br>
+                <b>Note</b>: Run your dag with docker exec pytn2018luigi_scheduler_1 python3 dags/part1.py &lt;YourTaskName&gt;
+            </p>
+        </section>
+        <section>
+            <h2>Parameterize Everything!</h2>
+            <pre><code data-trim data-noescape>
+                class TaskClass(luigi.Task):
+                    foo = luigi.Parameter(default="bar")
+
+                    def output(self):
+                        return luigi.LocalTarget("{}.txt".format(self.foo))
+                    ...
+            </code></pre>
+        </section>
+        <section>
+            <h2>Available Param Types</h2>
+            <ul>
+                <li>BooleanParam</li>
+                <li>IntParam</li>
+                <li>DictParam</li>
+                <li>DateParam</li>
+                <li>ChoiceParam</li>
+                <li>...and many more</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Passing params</h2>
+            <pre><code data-trim data-noescape>
+                class TaskClass(luigi.Task):
+                    foo = luigi.Parameter(default="bar")
+                ...
+                class DownStreamTask(luigi.Task):
+                    def requires(self):
+                        TaskClass(foo="baz")
+            </code></pre>
+            <pre><code data-trim data-noescape>
+                python3 dagfile.py TaskClass --foo baz
+            </code></pre>
+        </section>
+        <section>
+            <h2>Lesson 2</h2>
+            <p>
+                <b>Add parameters to your DAG</b><br><br>
+                Support different substitutions to be used
+            </p>
+        </section>
+        <section>
+            <h2>Grow your dag</h2>
+            <pre><code data-trim data-noescape>
+                class DownStreamTask(luigi.Task):
+                    def requires(self):
+                        [TaskClass(foo="bar"), TaskClass(foo="baz")]
+                    ...
+            </code></pre>
+        </section>
+        <section>
+            <h2>Arbitrary number of dependencies</h2>
+            <pre><code data-trim data-noescape>
+                class DownStreamTask(luigi.Task):
+                    dependencies = luigi.IntParameter(defaul=4)
+                    def requires(self):
+                        [TaskClass(x) for x in range(0, self.dependencies)]
+                    ...
+            </code></pre>
+        </section>
+        <section>
+            <h2>Read before you write</h2>
+            <ul>
+                <li>Tasks execute when dependency output file exists</li>
+                <li>hadoop.JobTask</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Lesson 3</h2>
+            <p>
+                <b>Read Multiple Files</b><br><br>
+                Create tasks for each input file and create a unified output of substitutions
+                Try to dynamically create external tasks
+            </p>
+        </section>
+        <section>
+            <h2>Break</h2>
         </section>
         <section>
             <h2>Airflow</h2>
