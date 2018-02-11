@@ -26,7 +26,7 @@
             float: right;
             text-align: right;
             z-index: -10;
-            width: 40%;
+            width: 30%;
         }
 
         .reveal pre code {
@@ -61,8 +61,8 @@
             <h2>Setup Instructions</h2>
             <p>
                 <ul>
-                    <li>https://github.com/ianze/PyTN2018-Airflow</li><br>
-                    <li>Luigi - TBD</li>
+                    <li>https://github.com/a-hacker/PyTN2018-Luigi</li><br>
+                    <li>https://github.com/ianze/PyTN2018-Airflow</li>
                 </ul>
             </p>
         </section>
@@ -75,20 +75,26 @@
                     <li>ETL Process</li>
                     <br/>
                     @izcoder<br/>
-                    ian.zelikman@gmail.com
+                    ian.zelikman@gmail
                 </ul>
             </div>
             <div id="right">
                 <b>Austin Hacker</b>
                 <ul>
-                    <li></li>
-                    <li></li>
+                    <li>Python programmer for 4+ years</li>
+                    <li>Workflow Automation</li>
+                    <br/>
                 </ul>
+                <p>
+                    explosivepyrounicorns@gmail
+                </p>
             </div>
         </section>
         <section>
             <h1>Intro</h1>
+            <img class="stretch" style="height: 609px; width: 512.77px;" src="img/example.png">
             <aside class="notes">
+<b>Simplified and Generalized</b>
 The idea for this tutorial came as Austin and I were looking at different solutions to ETL jobs/workflow engines that
 to be utilized by our team.<br>
 The intention is for developers that might be considering using these tools to get some more hands on experience<br>
@@ -105,6 +111,173 @@ Have some additional time to do this.<br>
 The tutorial is split into two sections. In each section we will present the engine we are working with.<br>
 We will then have a series of lessons where in each lesson we will cover some theory and then you can practice<br>
             </aside>
+        </section>
+        <section>
+            <h2>Luigi</h2>
+            <ul>
+                <li>Designed by Spotify</li>
+                <li>Automate long-running processes</li>
+                <li>Support for the Hadoop ecosystem</li>
+            </ul>
+            <aside class="notes">
+Luigi started as an internal tool developed by Spotify to manage the plumbing associated with long-running hadoop jobs and other batch processing.<br>
+Open sourced in 2012.<br>
+Like other workflow engines at the time, Luigi provides built-in support for Hadoop jobs but is designed to be more general use<br>
+            </aside>
+        </section>
+        <section>
+            <h2>Nitty Gritty</h2>
+            <ul>
+                <li>File-based</li>
+                <li>Visualiser Page</li>
+                <li>Scheduler and Workers</li>
+                <li>Object-Oriented Structure</li>
+            </ul>
+            <aside class="notes">
+Luigi uses files to trigger tasks and output data processing<br>
+While a task is running, a simple web UI is available to check on task progress<br>
+It is possible to run luigi pipelines with the local scheduler but the central scheduler is preffered.<br>
+Central scheduler is a single-threaded process that spawns workers when needed.<br>
+Tasks are specified using classes.<br>
+            </aside>
+        </section>
+        <section>
+            <h2>Task Structure</h2>
+            <pre><code data-trim data-noescape>
+                class TaskClass(luigi.Task):
+                    def requires(self):
+                        #I specify dependencies for this task
+                        return AnotherTaskClass()
+                    def output(self):
+                        #I specify an output file for task data
+                        return luigi.LocalTarget("target_file")
+                    def run(self):
+                        #I run code!
+                        pass
+            </code></pre>
+        </section>
+        <section>
+            <h2>Running a Task</h2>
+            <pre><code data-trim data-noescape>
+                class TaskClass(luigi.Task):
+                    ...
+                    def run(self):
+                        processed_data = ""
+                        with self.input().open('r') as foo:
+                            processed_data = foo.read()
+                        with self.output().open('w') as bar:
+                            bar.write(processed_data)
+            </code></pre>
+        </section>
+        <section>
+            <h2>External Tasks</h2>
+            <pre><code data-trim data-noescape>
+                class ExternalTaskClass(luigi.ExternalTask):
+                    def output(self):
+                        return luigi.LocalTarget("external_file.txt")
+            </code></pre>
+        </section>
+        <section>
+            <h2>Putting it Together</h2>
+            <pre><code data-trim data-noescape>
+                class ExternalTaskClass(luigi.ExternalTask):
+                    def output(self):
+                        return luigi.LocalTarget("external_file.txt")
+
+                class TaskClass(luigi.Task):
+                    def requires(self):
+                        return ExternalTaskClass()
+                    ...
+            </code></pre>
+        </section>
+        <section>
+            <h2>Lesson 1</h2>
+            <p>
+                <b>https://github.com/a-hacker/PyTN2018-Luigi</b>
+                <br><br>
+                Write your own dag to perform XKCD substitions on the input file.<br><br>
+                <b>Note</b>: Run your dag with docker exec pytn2018luigi_scheduler_1 python3 dags/part1.py &lt;YourTaskName&gt;
+            </p>
+        </section>
+        <section>
+            <h2>Parameterize Everything!</h2>
+            <pre><code data-trim data-noescape>
+                class TaskClass(luigi.Task):
+                    foo = luigi.Parameter(default="bar")
+
+                    def output(self):
+                        return luigi.LocalTarget("{}.txt".format(self.foo))
+                    ...
+            </code></pre>
+        </section>
+        <section>
+            <h2>Available Param Types</h2>
+            <ul>
+                <li>BooleanParam</li>
+                <li>IntParam</li>
+                <li>DictParam</li>
+                <li>DateParam</li>
+                <li>ChoiceParam</li>
+                <li>...and many more</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Passing params</h2>
+            <pre><code data-trim data-noescape>
+                class TaskClass(luigi.Task):
+                    foo = luigi.Parameter(default="bar")
+                ...
+                class DownStreamTask(luigi.Task):
+                    def requires(self):
+                        TaskClass(foo="baz")
+            </code></pre>
+            <pre><code data-trim data-noescape>
+                python3 dagfile.py TaskClass --foo baz
+            </code></pre>
+        </section>
+        <section>
+            <h2>Lesson 2</h2>
+            <p>
+                <b>Add parameters to your DAG</b><br><br>
+                Support different substitutions to be used
+            </p>
+        </section>
+        <section>
+            <h2>Grow your dag</h2>
+            <pre><code data-trim data-noescape>
+                class DownStreamTask(luigi.Task):
+                    def requires(self):
+                        [TaskClass(foo="bar"), TaskClass(foo="baz")]
+                    ...
+            </code></pre>
+        </section>
+        <section>
+            <h2>Arbitrary number of dependencies</h2>
+            <pre><code data-trim data-noescape>
+                class DownStreamTask(luigi.Task):
+                    dependencies = luigi.IntParameter(defaul=4)
+                    def requires(self):
+                        [TaskClass(x) for x in range(0, self.dependencies)]
+                    ...
+            </code></pre>
+        </section>
+        <section>
+            <h2>Read before you write</h2>
+            <ul>
+                <li>Tasks execute when dependency output file exists</li>
+                <li>hadoop.JobTask</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Lesson 3</h2>
+            <p>
+                <b>Read Multiple Files</b><br><br>
+                Create tasks for each input file and create a unified output of substitutions
+                Try to dynamically create external tasks
+            </p>
+        </section>
+        <section>
+            <h2>Break</h2>
         </section>
         <section>
             <h2>Airflow</h2>
@@ -127,7 +300,7 @@ This is not a data streaming solution (Spark streaming, storm), similar solution
             <ul>
                 <li>UI</li>
                 <li>MetaData Database(Postgres)</li>
-                <li>Scheduler</li>
+                <li>Scheduler(Executor)</li>
                 <li>Workers</li>
             </ul>
             <aside class="notes">
@@ -142,11 +315,10 @@ The worker actually execute the python code that was defined.
         </Section>
         <aside class="notes">
 The main UI is on port 8080<br>
+Stats about the DAG run, Code, Graph.<br>
 Show details about a DAG that ran, code<br>
 Run a DAG and show logs etc.<br>
 Show the logs of a task that run.<br>
-Show Flower UI - <br>
-We will use a celery worker and flower is the UI to monitor and administer the cluster.<br>
 Show components of our Docker setup and how we will work (DAGs directory, /tmp/work directory).
         </aside>
         <section>
@@ -188,7 +360,7 @@ That's it now you have see how you can define a DAG!<br>
                     dag=dag)
             </code></pre>
             <pre><code data-trim data-noescape>
-                 t2 = BashOperator(
+                t2 = BashOperator(
                     task_id='sleep',
                     bash_command='sleep 5',
                     dag=dag)
@@ -240,15 +412,15 @@ Other operators: Hive, Http (calls an endpoint), MySQL (runs a query), SlackPost
             <pre><code data-trim data-noescape>
                 dag_args = {
                     'email_on_retry': False,
-                    'retries': 3,
-                    'retry_delay': timedelta(seconds=30),
+                    'retries': 2,
+                    'retry_delay': timedelta(seconds=10),
                 }
             </code></pre>
             <pre><code data-trim data-noescape>
                 BashOperator(
                     task_id='sleep',
                     bash_command='sleep 5',
-                    retries=3,
+                    retries=5,
                     dag=dag)
             </code></pre>
         <aside class="notes">
@@ -263,8 +435,8 @@ This makes your job much more stable and robust.
             <pre><code data-trim data-noescape>
                 templated_command = """
                 {% for i in range(5) %}
-                echo "{{ ds }}"
-                echo "{{ params.my_param }}"
+                    echo "{{ ds }}"
+                    echo "{{ params.my_param }}"
                 {% endfor %}
                 """
             </code></pre>
@@ -290,6 +462,11 @@ Many of the Operators support passing a template argument that Airflow will rend
                         task_id='task-num-' + i,
                         bash_command=script.sh,
                         dag=dag)
+            </code></pre>
+
+            <pre><code data-trim data-noescape>
+                def print_task_id(ds, **kwargs):
+                    print("task id {}".format(kwargs['ti'].task_id)
             </code></pre>
 <aside class="notes">
 This is where I find a lot of the power of defining your workflow using Python lies. You are not limited to a static config file<br>
@@ -323,7 +500,7 @@ Refresh your DAG, run and see how some tasks are being retried.<br>
                 <li>Pools</li>
                 <li>SLA</li>
                 <li>Plugins</li>
-                <li>Historic Visualization</li>
+                <li>Hooks</li>
                 <li>Xcom</li>
             </ul>
 <aside class="notes">
@@ -351,9 +528,6 @@ Here too having the DAG defined using Python where you can read environment vari
         <section>
             <h2>CLI</h2>
             <pre><code data-trim data-noescape>
-                python dags/first_dag.py
-            </code></pre>
-            <pre><code data-trim data-noescape>
                 # command layout: command subcommand dag_id task_id date
 
                 # testing print_date
@@ -363,18 +537,6 @@ Here too having the DAG defined using Python where you can read environment vari
 First, after writing a DAG you can just see there are no syntax errors by running that module.<br>
 After that if you setup up correctly you can also run it using the CLI either locally or on the server<br>
 By using the CLI and the `test` command this run will not be logged to the DB and just run locally<br>
-</aside>
-        </section>
-        <section>
-            <h2>Unit Tests</h2>
-            <ul>
-                <li>Internal Logic</li>
-                <li>Operators</li>
-            </ul>
-<aside class="notes">
-When designing unit tests there are two approaches. Move as much of the logic as possible to a function and unit test the function<br>
-But once your logic is more complex you actually have state you might want to create your own operator.<br>
-The operator API is quite simple and you can implement it and construct unit tests around it<br>
 </aside>
         </section>
         <section>
